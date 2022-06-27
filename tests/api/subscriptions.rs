@@ -88,7 +88,7 @@ async fn subscribe_returns_a_400_when_fields_are_present_but_invalid() {
 #[tokio::test]
 async fn subscribe_sends_a_confirmation_email_with_a_link() {
     let app = spawn_app().await;
-    let body = "name=rooks&email=austin@r00ks.io";
+    let body = "name=rooks&email=rooks@rooks.io";
 
     Mock::given(path("/email"))
         .and(method("POST"))

@@ -27,13 +27,13 @@ impl Application {
             configuration.email_client.authorization_token,
             timeout,
         );
+
         let address = format!(
             "{}:{}",
             configuration.application.host, configuration.application.port
         );
-        let listener = TcpListener::bind(address)?;
+        let listener = TcpListener::bind(&address)?;
         let port = listener.local_addr().unwrap().port();
-
         let server = run(
             listener,
             connection_pool,
@@ -70,6 +70,7 @@ fn run(
     // wrap the connection in a smart pointer
     let db_pool = web::Data::new(db_pool);
     let email_client = web::Data::new(email_client);
+    let base_url = web::Data::new(ApplicationBaseUrl(base_url));
     let server = HttpServer::new(move || {
         App::new()
             .wrap(TracingLogger::default())
