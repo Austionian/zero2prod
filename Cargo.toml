@@ -13,6 +13,7 @@ name = "zero2prod"
 [dependencies]
 actix-web = "4"
 config = "0.11"
+sqlx = { version = "0.6", default-features = false, features = ["runtime-actix-rustls", "macros", "postgres", "uuid", "chrono", "migrate", "offline"] }
 tracing = { version = "0.1", features = ["log"] }
 tracing-bunyan-formatter = "0.3"
 tracing-log = "0.1"
@@ -30,19 +31,6 @@ fake = "~2.3"
 reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
 rand = { version = "0.8", features=["std_rng"] }
 thiserror = "1"
-
-[dependencies.sqlx]
-version = "0.6"
-default-features = false
-features = [
-    "runtime-actix-rustls", 
-    "macros", 
-    "postgres", 
-    "uuid", 
-    "chrono", 
-    "migrate",
-    "offline"
-]
 
 [dev-dependencies]
 claim = "0.5"
