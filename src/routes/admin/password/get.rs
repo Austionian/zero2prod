@@ -18,8 +18,10 @@ pub async fn change_password_form(
         writeln!(msg_html, "<p><i>{}</i></p>", m.content()).unwrap();
     }
 
-    Ok(HttpResponse::Ok().content_type(ContentType::html()).body(
-        r#"
+    Ok(HttpResponse::Ok()
+        .content_type(ContentType::html())
+        .body(format!(
+            r#"
             <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -59,5 +61,5 @@ pub async fn change_password_form(
 </body>
 </html>
 "#,
-    ))
+        )))
 }
