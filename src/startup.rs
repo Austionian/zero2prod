@@ -3,7 +3,7 @@ use crate::configuration::{DatabaseSettings, Settings};
 use crate::email_client::EmailClient;
 use crate::routes::{
     admin_dashboard, change_password, change_password_form, confirm, health_check, home, log_out,
-    login, login_form, publish_newsletter, subscribe,
+    login, login_form, newsletter_form, publish_newsletter, subscribe,
 };
 use actix_session::storage::RedisSessionStore;
 use actix_session::SessionMiddleware;
@@ -27,7 +27,9 @@ pub struct Application {
 
 impl Application {
     pub async fn build(configuration: Settings) -> Result<Self, anyhow::Error> {
-        let connection_pool = get_connection_pool(&configuration.database);
+        let connection_pool = get_connection_pool(&configuration.database)
+            .await
+            .expect("Failed to connect to Postgres.");
         let sender_email = configuration
             .email_client
             .sender()
@@ -70,10 +72,11 @@ impl Application {
 
 pub struct ApplicationBaseUrl(pub String);
 
-pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
+pub async fn get_connection_pool(configuration: &DatabaseSettings) -> Result<PgPool, sqlx::Error> {
     PgPoolOptions::new()
         .acquire_timeout(std::time::Duration::from_secs(2))
-        .connect_lazy_with(configuration.with_db())
+        .connect_with(configuration.with_db())
+        .await
 }
 
 async fn run(
@@ -106,13 +109,14 @@ async fn run(
             .route("/health_check", web::get().to(health_check))
             .route("/subscriptions", web::post().to(subscribe))
             .route("/subscriptions/confirm", web::get().to(confirm))
-            .route("/newsletters", web::post().to(publish_newsletter))
             .service(
                 web::scope("/admin")
                     .wrap(from_fn(reject_anonymous_users))
                     .route("/dashboard", web::get().to(admin_dashboard))
                     .route("/password", web::get().to(change_password_form))
                     .route("/password", web::post().to(change_password))
+                    .route("/newsletters", web::get().to(newsletter_form))
+                    .route("/newsletters", web::post().to(publish_newsletter))
                     .route("/logout", web::post().to(log_out)),
             )
             .app_data(db_pool.clone())
